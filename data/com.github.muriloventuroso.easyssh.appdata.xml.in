@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2018 Murilo Venturoso <muriloventuroso@gmail.com> -->
-<component type="desktop">
-  <id>com.github.muriloventuroso.easyssh.desktop</id>
+<component type="desktop-application">
+  <id>com.github.muriloventuroso.easyssh</id>
   <metadata_license>CC0</metadata_license>
   <project_license>GPL-3.0+</project_license>
   <name>EasySSH</name>
@@ -14,6 +14,46 @@
     <binary>com.github.muriloventuroso.easyssh</binary>
   </provides>
   ​<releases>
+    <release version="1.3.4" date="2018-08-28">
+      <description>
+        <p>Bugfix</p>
+      </description>
+    </release>
+    <release version="1.3.0" date="2018-08-16">
+      <description>
+        <p>New Icons</p>
+        <p>Sync ~/.ssh/config</p>
+        <p>Bugfix</p>
+      </description>
+    </release>
+    <release version="1.2.8" date="2018-07-25">
+      <description>
+        <p>Bugfix</p>
+        <p>Badge counter for unread changes in terminal</p>
+      </description>
+    </release>
+    <release version="1.2.7" date="2018-07-16">
+      <description>
+        <p>Update for Juno</p>
+      </description>
+    </release>
+    <release version="1.2.6" date="2018-06-24">
+      <description>
+        <p>Bugfix</p>
+      </description>
+    </release>
+    <release version="1.2.3" date="2018-06-21">
+      <description>
+        <p>Dark Theme</p>
+        <p>Forwarded Ports</p>
+        <p>Bugfix</p>
+      </description>
+    </release>
+    <release version="1.2.1" date="2018-05-21">
+      <description>
+        <p>Show in the file manager</p>
+      </description>
+    </release>
     <release version="1.2.0" date="2018-05-16">
       <description>
         <p>Restore opened hosts</p>
@@ -56,11 +96,14 @@
         <p>Initial release</p>
       </description>
     </release>
-    
+
   </releases>
   <screenshots>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/muriloventuroso/easyssh/master/data/screenshot.png</image>
+    </screenshot>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/muriloventuroso/easyssh/master/data/screenshot2.png</image>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1">

@@ -23,7 +23,7 @@ namespace EasySSH {
     public class Connection : Gtk.Box {
 
         public Host host {get; construct;}
-        public Granite.Widgets.DynamicNotebook notebook  { get; construct; }
+        public Granite.Widgets.DynamicNotebook notebook { get; construct; }
         private Gtk.Label title;
         private Gtk.Label description;
         public MainWindow window {get; construct;}
@@ -42,8 +42,13 @@ namespace EasySSH {
 
             title = new Gtk.Label(host.name);
             title.get_style_context ().add_class("h2");
-
-            description = new Gtk.Label("ssh " + host.username + "@" + host.host + " -p " + host.port);
+            var text_description = "";
+            if(host.ssh_config != ""){
+                text_description = "ssh " + host.name;
+            } else {
+                text_description = "ssh " + host.username + "@" + host.host + " -p " + host.port;
+            }
+            description = new Gtk.Label(text_description);
             description.get_style_context ().add_class("h4");
 
             pack_start(title, false, false, 0);
@@ -53,12 +58,14 @@ namespace EasySSH {
             connect_button.get_style_context ().add_class (Gtk.STYLE_CLASS_SUGGESTED_ACTION);
             connect_button.clicked.connect (add_tab);
             var edit_button  = new Gtk.Button.with_label (_("Edit"));
-            edit_button.action_name = MainWindow.ACTION_PREFIX + MainWindow.ACTION_EDIT_CONN;
-
+            edit_button.clicked.connect (() => {
+                window.action_edit_conn (host.name);
+            });
             var remove_button = new Gtk.Button.with_label (_("Remove"));
             remove_button.get_style_context ().add_class (Gtk.STYLE_CLASS_DESTRUCTIVE_ACTION);
-            remove_button.action_name = MainWindow.ACTION_PREFIX + MainWindow.ACTION_REMOVE_CONN;
-
+            remove_button.clicked.connect (() => {
+                window.action_remove_conn (host.name);
+            });
             var buttons = new Gtk.ButtonBox (Gtk.Orientation.HORIZONTAL);
             buttons.layout_style = Gtk.ButtonBoxStyle.CENTER;
             buttons.spacing = 6;
@@ -69,10 +76,9 @@ namespace EasySSH {
             buttons.pack_end(connect_button, false, false, 0);
 
             add(buttons);
-            
         }
 
-        public void add_tab(){
+        public void add_tab() {
             var term = new TerminalBox(host, notebook, window);
             term.set_can_focus(false);
             var next_tab = notebook.n_tabs;

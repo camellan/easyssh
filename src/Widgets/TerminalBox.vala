@@ -25,10 +25,12 @@ namespace EasySSH {
         public Host dataHost { get; construct; }
         private bool send_password;
         private bool open_dialog;
-        public Granite.Widgets.DynamicNotebook notebook  { get; construct; }
+        public Granite.Widgets.DynamicNotebook notebook { get; construct; }
         public TerminalWidget term;
-        public MainWindow window  { get; construct; }
+        public MainWindow window { get; construct; }
         public Granite.Widgets.Tab tab {get; set;}
+        private bool unread_changes;
+        private EasySSH.Settings settings;
 
         public TerminalBox (Host host, Granite.Widgets.DynamicNotebook notebook, MainWindow window) {
             Object (
@@ -39,13 +41,14 @@ namespace EasySSH {
         }
 
         construct {
+            settings = EasySSH.Settings.get_default();
             open_dialog = false;
+            unread_changes = false;
             var scroller = new Gtk.ScrolledWindow(null, null);
-            term = new TerminalWidget(window);
+            term = new TerminalWidget(window, dataHost);
             term.set_scrollback_lines(-1);
 
-            term.spawn_sync(Vte.PtyFlags.DEFAULT, null, {"/bin/sh"},
-                                        null, SpawnFlags.SEARCH_PATH, null, null, null);
+            term.active_shell ();
 
             term.contents_changed.connect(on_change_terminal);
             start_connection();
@@ -55,62 +58,115 @@ namespace EasySSH {
             set_vadjustment(term.get_vadjustment());
         }
 
-        public void start_connection(){
-            string cmd = "ssh " + dataHost.username + "@" + dataHost.host + " -p " + dataHost.port + "\n";
-            term.feed_child(cmd, cmd.length + 1);
+        public void set_selected (){
+            unread_changes = false;
         }
 
-        public void on_change_terminal (Vte.Terminal terminal){
-            string? res = terminal.get_text(null, null);
-            if(res != null){
-                string[] lines = res.split("\n");
-                string[] ret = {};
-                if(term != window.current_terminal){
-                    dataHost.item.icon = new GLib.ThemedIcon ("mail-mark-important");
-                    tab.icon = new GLib.ThemedIcon ("mail-mark-important");
+        public void start_connection() {
+            var builder = new StringBuilder ();
+            if(settings.sync_ssh_config == false){
+                builder.append("ssh " + dataHost.username + "@" + dataHost.host);
+                if(dataHost.port != ""){
+                    builder.append(" -p " + dataHost.port);
                 }
+                if(dataHost.identity_file != "" && dataHost.identity_file != null) {
+                    builder.append(" -i " + dataHost.identity_file);
+                }
+                string[] lines = dataHost.tunnels.split (",");
                 foreach (unowned string str in lines) {
                     if(str != ""){
+                        builder.append(" " + str);
+                    }
+                }
+                builder.append("\n");
+            } else {
+                builder.append("ssh ");
+                builder.append(dataHost.name.split(",")[0]);
+                builder.append("\n");
+            }
+            var cmd = builder.str;
+            #if UBUNTU_BIONIC_PATCHED_VTE
+                term.feed_child(cmd, cmd.length);
+            #else
+                term.feed_child(cmd.to_utf8 ());
+            #endif
+        }
+
+        public void add_badge (){
+            #if UNITY_SUPPORT
+            var entry = Unity.LauncherEntry.get_for_desktop_id ("com.github.muriloventuroso.easyssh.desktop");
+            entry.count_visible = true;
+            entry.count = entry.count + 1;
+            #endif
+            unread_changes = true;
+            dataHost.item.icon = new GLib.ThemedIcon ("mail-mark-important");
+            tab.icon = new GLib.ThemedIcon ("mail-mark-important");
+        }
+        public void remove_badge (){
+            #if UNITY_SUPPORT
+            var entry = Unity.LauncherEntry.get_for_desktop_id ("com.github.muriloventuroso.easyssh.desktop");
+            if(entry.count_visible == true){
+                entry.count = entry.count - 1;
+                if(entry.count == 0){
+                    entry.count_visible = false;
+                }
+            }
+            #endif
+            unread_changes = false;
+            dataHost.item.icon = new GLib.ThemedIcon ("mail-mark-important");
+            tab.icon = null;
+        }
+
+        public void on_change_terminal (Vte.Terminal terminal) {
+            string? res = terminal.get_text(null, null);
+            if(res != null) {
+                string[] lines = res.split("\n");
+                string[] ret = {};
+                if(term != window.current_terminal && unread_changes == false) {
+                    add_badge ();
+                }
+                foreach (unowned string str in lines) {
+                    if(str != "") {
                         ret += str;
                     }
 
                 }
                 if (ret.length > 2 && "closed." in ret[ret.length - 2] && "$" in ret[ret.length - 1]) {
                     var tab = notebook.get_tab_by_widget(this);
-                    notebook.remove_tab(tab);
+                    remove_tab (tab);
                 }else if (ret.length > 2 && "Broken pipe" in ret[ret.length - 2] && "$" in ret[ret.length - 1]) {
                     var tab = notebook.get_tab_by_widget(this);
-                    if(open_dialog == false){
+                    if(open_dialog == false) {
                         alert_error(ret[ret.length - 2], tab);
                     }
                 }else if (ret.length > 2 && "Connection timed out" in ret[ret.length - 2] && "$" in ret[ret.length - 1]) {
                     var tab = notebook.get_tab_by_widget(this);
-                    if(open_dialog == false){
+                    if(open_dialog == false) {
                         alert_error(ret[ret.length - 2], tab);
                     }
                 }else if (ret.length > 2 && "refused" in ret[ret.length - 2] && "$" in ret[ret.length - 1]) {
                     var tab = notebook.get_tab_by_widget(this);
-                    if(open_dialog == false){
+                    if(open_dialog == false) {
                         alert_error_retry(ret[ret.length - 2], tab);
                     }
                 }else if (ret.length > 2 && "No route to host" in ret[ret.length - 2] && "$" in ret[ret.length - 1]) {
                     var tab = notebook.get_tab_by_widget(this);
-                    if(open_dialog == false){
+                    if(open_dialog == false) {
                         alert_error_retry(ret[ret.length - 2], tab);
                     }
                 }else if (ret.length > 2 && "Permission denied, please try again." in ret[ret.length - 2]) {
                     var tab = notebook.get_tab_by_widget(this);
-                    if(open_dialog == false){
+                    if(open_dialog == false) {
                         alert_error(ret[ret.length - 2], tab);
                     }
                 }else if (ret.length > 3 && "yes/no" in ret[ret.length - 1]) {
                     var tab = notebook.get_tab_by_widget(this);
-                    if(open_dialog == false){
+                    if(open_dialog == false) {
                         var message = string.joinv("\n", ret[ret.length - 3:ret.length]);
                         alert_figerprint(message, tab);
                     }
-                }else if(ret.length > 0 && "password" in ret[ret.length - 1]){
-                    if(send_password == false){
+                }else if(ret.length > 0 && "password" in ret[ret.length - 1]) {
+                    if(send_password == false) {
                         term_send_password();
                         send_password = true;
                     }
@@ -119,15 +175,28 @@ namespace EasySSH {
             }
         }
 
-        private void term_send_password(){
-            term.feed_child(dataHost.password + "\n", dataHost.password.length + 1);
+        private void term_send_password() {
+            var cmd = dataHost.password + "\n";
+            #if UBUNTU_BIONIC_PATCHED_VTE
+                term.feed_child(cmd, cmd.length);
+            #else
+                term.feed_child(cmd.to_utf8 ());
+            #endif
         }
 
-        private void term_send(string cmd){
-            term.feed_child(cmd + "\n", cmd.length + 1);
+        private void term_send(string cmd) {
+            var n_cmd = cmd + "\n";
+            #if UBUNTU_BIONIC_PATCHED_VTE
+                term.feed_child(n_cmd, cmd.length);
+            #else
+                term.feed_child(n_cmd.to_utf8 ());
+            #endif
         }
 
-        private void remove_tab(Granite.Widgets.Tab tab){
+        private void remove_tab(Granite.Widgets.Tab tab) {
+            if(tab.icon != null){
+                remove_badge ();
+            }
             notebook.remove_tab(tab);
         }
 
@@ -145,7 +214,7 @@ namespace EasySSH {
             message_dialog.show_all ();
             if (message_dialog.run () == Gtk.ResponseType.ACCEPT) {
                 start_connection();
-            }else{
+            } else {
                 remove_tab(tab);
             }
 
@@ -179,7 +248,7 @@ namespace EasySSH {
             if (message_dialog.run () == Gtk.ResponseType.ACCEPT) {
                 term_send("yes");
                 term_send_password();
-            }else{
+            } else {
                 term_send("no");
                 remove_tab(tab);
             }

@@ -48,6 +48,8 @@ namespace EasySSH {
         private Gtk.Menu menu;
         public Granite.Widgets.Tab tab;
         public string? uri;
+        public Host host { get; construct; }
+        GLib.Pid child_pid;
 
         private string _tab_label;
         public string tab_label {
@@ -64,8 +66,6 @@ namespace EasySSH {
         }
 
         public int default_size;
-
-        const string SEND_PROCESS_FINISHED_BASH = "dbus-send --type=method_call --session --dest=io.elementary.terminal /io/elementary/terminal io.elementary.terminal.ProcessFinished string:$PANTHEON_TERMINAL_ID string:\"$(history 1 | cut -c 8-)\" int32:\$__bp_last_ret_value >/dev/null 2>&1";
 
         /* Following strings are used to build RegEx for matching URIs */
         const string USERCHARS = "-[:alnum:]";
@@ -93,7 +93,10 @@ namespace EasySSH {
             private set;
         }
 
-        public TerminalWidget (MainWindow parent_window) {
+        public TerminalWidget (MainWindow parent_window, Host host) {
+            Object (
+                host: host
+            );
 
             init_complete = false;
             window = parent_window;
@@ -143,15 +146,27 @@ namespace EasySSH {
 
         construct {
             settings = EasySSH.Settings.get_default();
-            if(settings.terminal_background_color != ""){
+            if(host.color != "" && host.color != null) {
+                var color = Gdk.RGBA();
+                color.parse(host.color);
+                set_color_background(color);
+
+            } else if (settings.terminal_background_color != "") {
                 var color = Gdk.RGBA();
                 color.parse(settings.terminal_background_color);
-                set_color_background(color);    
+                set_color_background(color);
             }
-            if(settings.terminal_font != ""){
-                set_font(new Pango.FontDescription().from_string(settings.terminal_font));    
+            if(host.font != "" && host.font != null) {
+                set_font(new Pango.FontDescription().from_string(host.font));
+            } else if (settings.terminal_font != "") {
+                set_font(new Pango.FontDescription().from_string(settings.terminal_font));
             }
-            
+
+        }
+
+        public void active_shell() {
+            this.spawn_sync(Vte.PtyFlags.DEFAULT, null, {"/bin/sh"},
+                                        null, SpawnFlags.SEARCH_PATH, null, out this.child_pid, null);
         }
 
 

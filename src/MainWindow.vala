@@ -26,11 +26,10 @@ namespace EasySSH {
         private Gtk.Clipboard clipboard;
         private Gtk.Clipboard primary_selection;
         private EasySSH.Settings settings;
+        private string default_filemanager = "";
 
         public const string ACTION_PREFIX = "win.";
         public const string ACTION_NEW_CONN = "action_new_conn";
-        public const string ACTION_EDIT_CONN = "action_edit_conn";
-        public const string ACTION_REMOVE_CONN = "action_remove_conn";
         public const string ACTION_PREFERENCES = "action_preferences";
 
         public SimpleActionGroup actions { get; construct; }
@@ -39,8 +38,6 @@ namespace EasySSH {
 
         private const ActionEntry[] action_entries = {
             { ACTION_NEW_CONN, action_new_conn },
-            { ACTION_EDIT_CONN, action_edit_conn },
-            { ACTION_REMOVE_CONN, action_remove_conn },
             { ACTION_PREFERENCES, action_preferences },
         };
 
@@ -50,6 +47,7 @@ namespace EasySSH {
                 <menuitem name="Copy" action="Copy"/>
                 <menuitem name="Paste" action="Paste"/>
                 <menuitem name="Select All" action="Select All"/>
+                <menuitem name="Show in File Browser" action="Show in File Browser"/>
             </popup>
             </ui>
         """;
@@ -68,6 +66,11 @@ namespace EasySSH {
 
         construct {
             settings = EasySSH.Settings.get_default();
+            Gtk.Settings.get_default ().gtk_application_prefer_dark_theme = settings.use_dark_theme;
+            settings.notify["use-dark-theme"].connect (
+                () => {
+                    Gtk.Settings.get_default ().gtk_application_prefer_dark_theme = settings.use_dark_theme;
+            });
 
             actions = new SimpleActionGroup ();
             actions.add_action_entries (action_entries, this);
@@ -132,21 +135,68 @@ namespace EasySSH {
                 }
                 return false;
             });
+            get_default_filemanager ();
+
+            settings.notify["sync-ssh-config"].connect (
+                () => {
+                    sourcelist.load_ssh_config ();
+                    sourcelist.save_hosts ();
+            });
+            sourcelist.host_edit_clicked.connect ((name) => {
+                sourcelist.edit_conn(name);
+            });
+            sourcelist.host_remove_clicked.connect ((name) => {
+                sourcelist.remove_conn(name);
+            });
+        }
+
+        private void get_default_filemanager () {
+            var stdout = "";
+            var stderr = "";
+            var result = Process.spawn_command_line_sync ("xdg-mime query default inode/directory",
+                                    out stdout,
+                                    out stderr,
+                                    null);
+            if(result==false) {
+                print(stderr + "\n");
+                return;
+            }
+            var filename = stdout;
+
+            var res = Process.spawn_command_line_sync ("cat /usr/share/applications/" + filename,
+                                    out stdout,
+                                    out stderr,
+                                    null);
+            if(res==false) {
+                print(stderr + "\n");
+                return;
+            }
+            var lines = stdout.split("\n");
+            var filemanager = "";
+            foreach (string line in lines) {
+                var split_line = line.split("=");
+                if(split_line[0] == "Exec") {
+                    filemanager = split_line[1].replace("%U", "");
+                    break;
+                }
+            }
+            if(filemanager != "") {
+                default_filemanager = filemanager;
+            }
         }
 
         private TerminalBox? get_term_widget (Granite.Widgets.Tab tab) {
-            if(Type.from_instance(tab.page).name() == "EasySSHConnection"){
+            if(Type.from_instance(tab.page).name() == "EasySSHConnection") {
                 return null;
-            }else{
+            } else {
                 return (TerminalBox)tab.page;
             }
-            
         }
 
         private void save_opened_hosts () {
             string[] opened_hosts = {};
             var notebooks = sourcelist.hostmanager.get_notebooks();
-            for(int a = 0; a < notebooks.size; a++){
+            for(int a = 0; a < notebooks.size; a++) {
                 var notebook = notebooks[a];
                 var count = 0;
                 var location = "";
@@ -159,23 +209,21 @@ namespace EasySSH {
                     location = term.dataHost.name;
                     count += 1;
                 });
-                if(count > 0){
+                if(count > 0) {
                     opened_hosts += location + "," + count.to_string();
                 }
-                
             }
 
             settings.hosts = opened_hosts;
 
         }
 
-        private void restore_hosts(){
+        private void restore_hosts() {
             for (int i = 0; i < settings.hosts.length; i++) {
                 var entry = settings.hosts[i];
                 var host_split = entry.split(",");
                 var qtd_hosts = host_split[host_split.length - 1];
                 var name_host = string.joinv(",", host_split[0:host_split.length - 1]);
-                
                 sourcelist.restore_hosts(name_host, int.parse(qtd_hosts));
             }
         }
@@ -188,17 +236,16 @@ namespace EasySSH {
                 this.set_default_size (settings.window_width, settings.window_height);
             }
             this.move (settings.pos_x, settings.pos_y);
-            if(settings.restore_hosts == true){
+            if(settings.restore_hosts == true) {
                 restore_hosts();
             }
 
         }
 
         private void save_settings () {
-            if(settings.restore_hosts == true){
+            if(settings.restore_hosts == true) {
                 save_opened_hosts();
             }
-            
             settings.window_maximized = this.is_maximized;
 
             if (!settings.window_maximized) {
@@ -242,14 +289,14 @@ namespace EasySSH {
 
             main_actions.get_action ("Paste").set_sensitive (can_paste);
         }
+        public void action_edit_conn (string name) {
+            sourcelist.edit_conn(name);
+        }
+        public void action_remove_conn (string name) {
+            sourcelist.remove_conn(name);
+        }
         private void action_new_conn () {
             sourcelist.new_conn();
-        }
-        private void action_edit_conn () {
-            sourcelist.edit_conn();
-        }
-        private void action_remove_conn () {
-            sourcelist.remove_conn();
         }
         private void action_preferences () {
             if (preferences_dialog == null) {
@@ -279,11 +326,19 @@ namespace EasySSH {
         void action_select_all () {
             current_terminal.select_all ();
         }
+        void action_open_in_files () {
+            if(default_filemanager == "") {
+                return;
+            }
+            var command = "sftp://" + current_terminal.host.username + "@" + current_terminal.host.host + ":" + current_terminal.host.port;
+            Process.spawn_command_line_async (default_filemanager + " " + command);
+        }
 
         const Gtk.ActionEntry[] main_entries = {
             { "Copy", null, N_("Copy"), "<Control><Shift>c", null, action_copy },
             { "Paste", null, N_("Paste"), "<Control><Shift>v", null, action_paste },
             { "Select All", null, N_("Select All"), "<Control><Shift>a", null, action_select_all },
+            { "Show in File Browser", null, N_("Show in File Browser"), "<Control><Shift>e", null, action_open_in_files }
         };
     }
 
