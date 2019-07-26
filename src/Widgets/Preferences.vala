@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 Murilo Venturoso
+* Copyright (c) 2019 Murilo Venturoso
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public
@@ -56,6 +56,8 @@ namespace EasySSH {
             });
 
             var terminal_font_button = new Gtk.FontButton.with_font(settings.terminal_font);
+            terminal_font_button.use_font = true;
+            terminal_font_button.use_size = true;
             terminal_font_button.font_set.connect(() => {
                 settings.terminal_font = terminal_font_button.get_font();
             });
@@ -75,6 +77,15 @@ namespace EasySSH {
             sync_ssh_switch.notify["active"].connect (() => {
                 settings.sync_ssh_config = sync_ssh_switch.active;
             });
+            #if WITH_GPG
+            var encrypt_data_switch = new Gtk.Switch();
+            encrypt_data_switch.halign = Gtk.Align.START;
+            encrypt_data_switch.valign = Gtk.Align.CENTER;
+            encrypt_data_switch.set_active(settings.encrypt_data);
+            encrypt_data_switch.notify["active"].connect (() => {
+                settings.encrypt_data = encrypt_data_switch.active;
+            });
+            #endif
 
             var use_dark_theme = new Gtk.Switch ();
             use_dark_theme.halign = Gtk.Align.START;
@@ -94,6 +105,10 @@ namespace EasySSH {
             general_grid.attach (new Granite.HeaderLabel (_("Sync SSH Config:")), 0, 2, 1, 1);
             general_grid.attach (sync_ssh_switch, 1, 2, 1, 1);
 
+            #if WITH_GPG
+            general_grid.attach (new Granite.HeaderLabel (_("Encrypt data:")), 0, 4, 1, 1);
+            general_grid.attach (encrypt_data_switch, 1, 4, 1, 1);
+            #endif
             var appearance_grid = new Gtk.Grid ();
 
             appearance_grid.attach (new Granite.HeaderLabel (_("Terminal Background Color:")), 0, 0, 1, 1);

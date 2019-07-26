@@ -21,10 +21,14 @@
 
 namespace EasySSH {
     public class HeaderBar : Gtk.HeaderBar {
+        public Gtk.ToggleButton search_button;
+        public Gtk.MenuButton bookmarks_button;
+        public BookmarksPopover bookmarks_popover;
+        public MainWindow window { get; construct; }
 
-
-        public HeaderBar () {
+        public HeaderBar (MainWindow window) {
                 Object (
+                    window: window,
                     has_subtitle: false,
                     show_close_button: true
                 );
@@ -35,11 +39,27 @@ namespace EasySSH {
 
             new_conn.action_name = MainWindow.ACTION_PREFIX + MainWindow.ACTION_NEW_CONN;
             new_conn.tooltip_text = _("Create a new connection");
+            search_button = new Gtk.ToggleButton ();
+            search_button.action_name = MainWindow.ACTION_PREFIX + MainWindow.ACTION_SEARCH;
+            search_button.image = new Gtk.Image.from_icon_name ("edit-find-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+            search_button.valign = Gtk.Align.CENTER;
+
+            bookmarks_popover = new BookmarksPopover (window);
+
+            bookmarks_button = new Gtk.MenuButton ();
+            bookmarks_button.set_can_focus (false);
+            bookmarks_button.image = new Gtk.Image.from_icon_name ("user-bookmarks-symbolic", Gtk.IconSize.SMALL_TOOLBAR);
+            bookmarks_button.valign = Gtk.Align.CENTER;
+            bookmarks_button.popover = bookmarks_popover;
+            bookmarks_button.tooltip_text = _("Bookmarks");
 
             var preferences_menuitem = new Gtk.MenuItem.with_label (_("Preferences"));
             preferences_menuitem.action_name = MainWindow.ACTION_PREFIX + MainWindow.ACTION_PREFERENCES;
+            var close_tabs_menuitem = new Gtk.MenuItem.with_label (_("Close All Connections"));
+            close_tabs_menuitem.action_name = MainWindow.ACTION_PREFIX + MainWindow.ACTION_CLOSE_TABS;
             var menu = new Gtk.Menu ();
             menu.append (preferences_menuitem);
+            menu.append (close_tabs_menuitem);
             menu.show_all ();
 
             Gtk.MenuButton settings_button = new Gtk.MenuButton ();
@@ -50,6 +70,8 @@ namespace EasySSH {
 
             pack_start(new_conn);
             pack_end(settings_button);
+            pack_end(search_button);
+            pack_end(bookmarks_button);
 
         }
 

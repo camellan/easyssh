@@ -18,9 +18,10 @@ A complete, efficient and easy-to-use manager. Create and edit connections, grou
 * Multiple instances of same connection
 * Restore opened hosts
 * Sync `~/.ssh/config`
+* Protect data with password
 
 ### Donate
-<a href="https://www.paypal.me/muriloventuroso">PayPal</a> | <a href="https://www.patreon.com/muriloventuroso">Patreon</a>
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=YQ7R5KQJPUNNU&currency_code=BRL&source=url">PayPal</a> | <a href="https://www.patreon.com/muriloventuroso">Patreon</a>
 
 ![Screenshot](data/screenshot.png)
 
@@ -42,6 +43,7 @@ If you want to hack on and build EasySSH yourself, you'll need the following dep
 * libunity-dev
 * meson
 * valac
+* gpg
 
 Run `meson build` to configure the build environment and run `ninja test` to build and run automated tests
 
@@ -58,7 +60,8 @@ To install, use `ninja install`, then execute with `com.github.muriloventuroso.e
 ## Install with Flatpak
 
 Install:
-
+    
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     flatpak install flathub com.github.muriloventuroso.easyssh
 
 Run:

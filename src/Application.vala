@@ -23,7 +23,7 @@ namespace EasySSH {
 
     public Settings settings;
 
-    public class Application : Granite.Application {
+    public class Application : Gtk.Application {
         public Application () {
             Object (application_id: "com.github.muriloventuroso.easyssh",
             flags: ApplicationFlags.FLAGS_NONE);
@@ -41,11 +41,10 @@ namespace EasySSH {
             settings = new Settings ();
             var app_window = new MainWindow (this);
             app_window.show_all ();
-
+            app_window.finish_construction();
             var quit_action = new SimpleAction ("quit", null);
 
             add_action (quit_action);
-            set_accels_for_action ("app.quit", {"Escape"});
 
             var provider = new Gtk.CssProvider ();
             provider.load_from_resource ("/com/github/muriloventuroso/easyssh/Application.css");
@@ -59,7 +58,6 @@ namespace EasySSH {
         }
 
         private static int main (string[] args) {
-            Gtk.init (ref args);
 
             var app = new Application ();
             return app.run (args);

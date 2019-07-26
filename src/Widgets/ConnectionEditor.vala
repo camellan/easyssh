@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2018 Murilo Venturoso
+* Copyright (c) 2019 Murilo Venturoso
 *
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public
@@ -29,6 +29,7 @@ namespace EasySSH {
         private Gtk.Entry port_entry;
         private Gtk.Entry username_entry;
         private Gtk.Entry password_entry;
+        private Gtk.Entry extra_arguments;
         private Gtk.TextView ssh_config_entry;
         private Gtk.ColorButton terminal_background_color_button;
         private Gtk.FontButton terminal_font_button;
@@ -40,15 +41,22 @@ namespace EasySSH {
         private Gee.ArrayList<string> array_tunnels;
         private Gtk.CheckButton change_password;
         private Gtk.FileChooserButton identityfile_chooser;
+        private Gtk.RadioButton set_credentials;
+        private Gtk.RadioButton set_account;
+        private Gtk.Revealer revealer_credentials;
+        private Gtk.Revealer revealer_accounts;
+        private Gtk.ComboBoxText accounts_box;
         public SourceListView sourcelistview { get; construct; }
         public Host data_host { get; construct; }
+        public bool duplicate {get; construct; }
 
-        public ConnectionEditor (SourceListView sourcelistview, Host? data_host) {
+        public ConnectionEditor (SourceListView sourcelistview, Host? data_host, bool duplicate = false) {
             Object (
                 sourcelistview: sourcelistview,
                 data_host: data_host,
                 margin_start: 20,
-                margin_end: 20
+                margin_end: 20,
+                duplicate: duplicate
             );
         }
 
@@ -65,6 +73,23 @@ namespace EasySSH {
             name_error_revealer = new ErrorRevealer (".");
             name_error_revealer.label_widget.get_style_context ().add_class (Gtk.STYLE_CLASS_ERROR);
 
+            Gtk.Box box_btn_credentials = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+            box_btn_credentials.margin_top = 6;
+            box_btn_credentials.margin_bottom = 6;
+            box_btn_credentials.set_spacing(6);
+            set_credentials = new Gtk.RadioButton.with_label_from_widget (null, _("Set Credentials"));
+            box_btn_credentials.pack_start (set_credentials, false, false, 0);
+            set_credentials.toggled.connect (toggled_btn_credentials);
+
+            set_account = new Gtk.RadioButton.with_label_from_widget (set_credentials, _("Choose Account"));
+            box_btn_credentials.pack_start (set_account, false, false, 0);
+            set_account.toggled.connect (toggled_btn_credentials);
+
+            revealer_credentials = new Gtk.Revealer();
+            revealer_credentials.set_reveal_child(true);
+            revealer_accounts = new Gtk.Revealer();
+            revealer_accounts.set_reveal_child(false);
+
             group_entry = new Gtk.Entry ();
             host_entry = new Gtk.Entry ();
             port_entry = new Gtk.Entry ();
@@ -78,6 +103,18 @@ namespace EasySSH {
             ssh_config_entry.left_margin = 10;
             ssh_config_entry.top_margin = 10;
             ssh_config_scroll.add (ssh_config_entry);
+            var label_password = new Granite.HeaderLabel (_("Password:"));
+            extra_arguments = new Gtk.Entry ();
+            accounts_box = new Gtk.ComboBoxText ();
+            var count = 0;
+            foreach(var account in sourcelistview.accountmanager.get_accounts()){
+                accounts_box.append_text(account.name);
+                if(data_host != null && data_host.account == account.name) {
+                    accounts_box.active = count;
+                }
+                count += 1;
+            }
+
 
             var color = Gdk.RGBA ();
             if(data_host != null) {
@@ -88,8 +125,14 @@ namespace EasySSH {
                 port_entry.text = data_host.port;
                 username_entry.text = data_host.username;
                 password_entry.text = data_host.password;
+                extra_arguments.text = data_host.extra_arguments;
                 color.parse(data_host.color);
                 var terminal_font = data_host.font;
+                if(data_host.account != ""){
+                    set_account.set_active (true);
+                    revealer_credentials.set_reveal_child(false);
+                    revealer_accounts.set_reveal_child(true);
+                }
             } else {
                 color.parse(settings.terminal_background_color);
                 var terminal_font = settings.terminal_font;
@@ -97,11 +140,15 @@ namespace EasySSH {
 
             terminal_background_color_button = new Gtk.ColorButton.with_rgba (color);
             terminal_font_button = new Gtk.FontButton.with_font(settings.terminal_font);
-
+            terminal_font_button.use_font = true;
+            terminal_font_button.use_size = true;
             name_entry.changed.connect (() => {
                 name_entry.is_valid = check_name ();
                 update_save_button ();
             });
+
+            identityfile_chooser = new Gtk.FileChooserButton (_("Select Identity File"), Gtk.FileChooserAction.OPEN);
+            change_password = new Gtk.CheckButton.with_label (_("Change Password to Identity File"));
 
             save_button = new Gtk.Button.with_label (_("Save"));
             save_button.get_style_context ().add_class (Gtk.STYLE_CLASS_SUGGESTED_ACTION);
@@ -124,10 +171,29 @@ namespace EasySSH {
             buttons.add(cancel_button);
             buttons.pack_end(save_button, false, false, 0);
 
+            var box_credentials = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            box_credentials.pack_start(new Granite.HeaderLabel (_("Username:")), true, true, 0);
+            box_credentials.pack_start(username_entry, true, true, 0);
+            box_credentials.pack_start(label_password, true, true, 0);
+            box_credentials.pack_end(change_password, true, true, 0);
+            box_credentials.pack_start(password_entry, true, true, 0);
+            box_credentials.pack_start(identityfile_chooser, true, true, 0);
+
+            revealer_credentials.add(box_credentials);
+
+            var box_accounts = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            box_accounts.pack_start(accounts_box, true, true, 0);
+            revealer_accounts.add(box_accounts);
+
+
             if(data_host == null) {
                 label = new Gtk.Label(_("Add Connection"));
             } else {
-                label = new Gtk.Label(_("Edit Connection"));
+                if(duplicate == false){
+                    label = new Gtk.Label(_("Edit Connection"));
+                }else{
+                    label = new Gtk.Label(_("Duplicate Connection"));
+                }
             }
             label.get_style_context ().add_class("h2");
             grid.add (label);
@@ -140,16 +206,10 @@ namespace EasySSH {
             grid.attach (host_entry, 0, 7, 1, 1);
             grid.attach (new Granite.HeaderLabel (_("Port:")), 0, 8, 1, 1);
             grid.attach (port_entry, 0, 9, 1, 1);
-            grid.attach (new Granite.HeaderLabel (_("Username:")), 0, 10, 1, 1);
-            grid.attach (username_entry, 0, 11, 1, 1);
-            var label_password = new Granite.HeaderLabel (_("Password:"));
+            grid.attach (box_btn_credentials, 0, 10, 1, 1);
+            grid.attach (revealer_credentials, 0, 11, 1, 1);
+            grid.attach (revealer_accounts, 0, 12, 1, 1);
 
-            grid.attach (label_password, 0, 12, 1, 1);
-            grid.attach (password_entry, 0, 13, 1, 1);
-            change_password = new Gtk.CheckButton.with_label (_("Change Password to Identity File"));
-            identityfile_chooser = new Gtk.FileChooserButton (_("Select Identity File"), Gtk.FileChooserAction.OPEN);
-            grid.attach (identityfile_chooser, 0, 13, 1, 1);
-            identityfile_chooser.hide();
             change_password.toggled.connect (() => {
                 if (change_password.active) {
                     password_entry.hide();
@@ -249,14 +309,14 @@ namespace EasySSH {
                         var new_line = l + "\n";
                         if(l.length >= 12){
                             if(l.substring(0, 12) == "IdentityFile"){
-                                new_line = "IdentityFile " + identityfile_chooser.get_uri() + "\n";
+                                new_line = "IdentityFile " + identityfile_chooser.get_uri().replace("file://", "") + "\n";
                                 change = true;
                             }
                         }
                         new_config += new_line;
                     }
                     if(change == false){
-                        new_config += "IdentityFile " + identityfile_chooser.get_uri() + "\n";
+                        new_config += "IdentityFile " + identityfile_chooser.get_uri().replace("file://", "") + "\n";
                     }
                     ssh_config_entry.buffer.text = new_config;
                 });
@@ -306,6 +366,11 @@ namespace EasySSH {
                     }
                 }
             }
+
+            var other_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+
+            other_box.pack_start (new Granite.HeaderLabel (_("Extra Arguments:")), false, false, 0);
+            other_box.pack_start (extra_arguments, false, false, 0);
 
             var scroll_tunnels = new Gtk.ScrolledWindow(null, null);
             scroll_tunnels.set_min_content_height(80);
@@ -369,11 +434,9 @@ namespace EasySSH {
             add_tunnel_grid.attach (button_add_tunnel, 6, 0, 1, 1);
 
             var main_stack = new Gtk.Stack ();
-            main_stack.margin = 6;
-            main_stack.margin_bottom = 18;
-            main_stack.margin_top = 24;
             main_stack.add_titled (appearance_grid, "appearance", _("Appearance"));
             main_stack.add_titled (tunnels_box, "tunnels", _("Tunnels"));
+            main_stack.add_titled (other_box, "other", _("Other"));
 
             var main_stackswitcher = new Gtk.StackSwitcher ();
             main_stackswitcher.set_stack (main_stack);
@@ -387,6 +450,26 @@ namespace EasySSH {
             grid.attach (buttons, 0, 18, 1, 1);
             update_save_button();
             show_all ();
+            if(data_host == null) {
+                identityfile_chooser.hide();
+            }else{
+                if(data_host.identity_file != ""){
+                    identityfile_chooser.set_uri(data_host.identity_file);
+                    password_entry.hide();
+                }else{
+                    identityfile_chooser.hide();
+                }
+            }
+        }
+
+        private void toggled_btn_credentials (Gtk.ToggleButton button) {
+            if(set_credentials.get_active() == true){
+                revealer_accounts.set_reveal_child(false);
+                revealer_credentials.set_reveal_child(true);
+            }else{
+                revealer_credentials.set_reveal_child(false);
+                revealer_accounts.set_reveal_child(true);
+            }
         }
 
         private bool check_name () {
@@ -395,6 +478,10 @@ namespace EasySSH {
             if(data_host != null) {
                 if(name_entry_text != data_host.name) {
                     name_is_taken = sourcelistview.hostmanager.exist_host_name (name_entry_text);
+                }else{
+                    if(duplicate == true){
+                        name_is_taken = sourcelistview.hostmanager.exist_host_name (name_entry_text);
+                    }
                 }
             } else {
                 name_is_taken = sourcelistview.hostmanager.exist_host_name (name_entry_text);
@@ -425,16 +512,28 @@ namespace EasySSH {
             host.group = group_entry.text;
             host.host = host_entry.text;
             host.port = port_entry.text;
-            host.username = username_entry.text;
-            if(change_password.active){
-                host.identity_file = identityfile_chooser.get_uri();
-                host.password = "";
+
+            if(set_credentials.get_active() == false){
+                var account_name = accounts_box.get_active_text ();
+                host.account = account_name;
+                var account = sourcelistview.accountmanager.get_account_by_name(host.account);
+                host.username = account.username;
+                host.password = account.password;
+                host.identity_file = account.identity_file;
             }else{
-                host.identity_file = "";
-                host.password = password_entry.text;
+                host.account = "";
+                host.username = username_entry.text;
+                if(change_password.active){
+                    host.identity_file = identityfile_chooser.get_uri().replace("file://", "");
+                    host.password = "";
+                }else{
+                    host.identity_file = "";
+                    host.password = password_entry.text;
+                }
             }
             host.color = terminal_background_color_button.rgba.to_string();
             host.font = terminal_font_button.get_font();
+            host.extra_arguments = extra_arguments.text;
             if(settings.sync_ssh_config){
                 host.ssh_config = ssh_config_entry.buffer.text;
             }
@@ -452,7 +551,11 @@ namespace EasySSH {
             if(data_host == null) {
                 host = sourcelistview.add_host(host);
             } else {
-                host = sourcelistview.edit_host(data_host.name, host);
+                if(duplicate == false){
+                    host = sourcelistview.edit_host(data_host.name, host);
+                }else{
+                    host = sourcelistview.add_host(host);
+                }
             }
             var item = sourcelistview.source_list.selected;
             sourcelistview.source_list.selected = null;

@@ -78,6 +78,9 @@ namespace EasySSH {
                         builder.append(" " + str);
                     }
                 }
+                if(dataHost.extra_arguments != null && dataHost.extra_arguments != ""){
+                    builder.append(" " + dataHost.extra_arguments);
+                }
                 builder.append("\n");
             } else {
                 builder.append("ssh ");
@@ -113,7 +116,7 @@ namespace EasySSH {
             }
             #endif
             unread_changes = false;
-            dataHost.item.icon = new GLib.ThemedIcon ("mail-mark-important");
+            dataHost.item.icon = null;
             tab.icon = null;
         }
 
@@ -194,9 +197,6 @@ namespace EasySSH {
         }
 
         private void remove_tab(Granite.Widgets.Tab tab) {
-            if(tab.icon != null){
-                remove_badge ();
-            }
             notebook.remove_tab(tab);
         }
 

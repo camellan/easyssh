@@ -14,6 +14,69 @@
     <binary>com.github.muriloventuroso.easyssh</binary>
   </provides>
   ​<releases>
+    <release version="1.6.1" date="2019-05-31">
+      <description>
+        <p>Update Screenshots</p>
+      </description>
+    </release>
+    <release version="1.6.0" date="2019-05-30">
+      <description>
+        <p>Basic Bookmarks</p>
+        <p>Bugfix</p>
+      </description>
+    </release>
+    <release version="1.5.3" date="2019-01-21">
+      <description>
+        <p>Close all connections</p>
+      </description>
+    </release>
+    <release version="1.5.2" date="2019-01-16">
+      <description>
+        <p>Update translations</p>
+        <p>Bugfix</p>
+      </description>
+    </release>
+    <release version="1.5.1" date="2019-01-08">
+      <description>
+        <p>Terminal Search</p>
+        <p>Shortcuts</p>
+      </description>
+    </release>
+    <release version="1.5.0" date="2019-01-04">
+      <description>
+        <p>Account Management</p>
+      </description>
+    </release>
+    <release version="1.4.7" date="2019-01-01">
+      <description>
+        <p>Bugfix</p>
+      </description>
+    </release>
+    <release version="1.4.6" date="2018-12-20">
+      <description>
+        <p>Duplicate connections</p>
+        <p>Badge counter of open connections in hosts list</p>
+        <p>Bugfix</p>
+      </description>
+    </release>
+    <release version="1.4.5" date="2018-11-30">
+      <description>
+        <p>Allow ESC as command in SSH</p>
+        <p>Update Translations</p>
+      </description>
+    </release>
+    <release version="1.4.0" date="2018-11-20">
+      <description>
+        <p>Bugfix</p>
+        <p>Encrypt Data</p>
+      </description>
+    </release>
+    <release version="1.3.5" date="2018-10-23">
+      <description>
+        <p>Bugfix</p>
+        <p>New Translations</p>
+      </description>
+    </release>
     <release version="1.3.4" date="2018-08-28">
       <description>
         <p>Bugfix</p>
@@ -98,6 +161,11 @@
     </release>
 
   </releases>
+  <categories>
+    <category>Development</category>
+    <category>Network</category>
+    <category>Utility</category>
+  </categories>
   <screenshots>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/muriloventuroso/easyssh/master/data/screenshot.png</image>
@@ -138,7 +206,7 @@
   <developer_name>Murilo Venturoso</developer_name>
   <url type="homepage">https://github.com/muriloventuroso/easyssh</url>
   <url type="bugtracker">https://github.com/muriloventuroso/easyssh/issues</url>
-  <url type="translate">https://github.com/muriloventuroso/easyssh/tree/master/po</url>
+  <url type="translate">https://hosted.weblate.org/projects/easyssh</url>
   <custom>
     <value key="x-appcenter-color-primary">#ffe16b</value>
     <value key="x-appcenter-color-primary-text">#000</value>

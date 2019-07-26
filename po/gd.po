@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: com.github.muriloventuroso.easyssh\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-15 15:32-0300\n"
+"POT-Creation-Date: 2019-07-23 09:27-0300\n"
 "PO-Revision-Date: 2018-04-23 15:43-0300\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -16,62 +16,101 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/MainWindow.vala:66
+#: src/MainWindow.vala:102
 msgid "EasySSH"
 msgstr ""
 
-#: src/MainWindow.vala:336
+#: src/MainWindow.vala:535
 msgid "Copy"
 msgstr ""
 
-#: src/MainWindow.vala:337
+#: src/MainWindow.vala:536
 msgid "Paste"
 msgstr ""
 
-#: src/MainWindow.vala:338 src/MainWindow.vala:339
+#: src/MainWindow.vala:537
 msgid "Select All"
 msgstr ""
 
-#: src/MainWindow.vala:340
+#: src/MainWindow.vala:538
 msgid "Show in File Browser"
 msgstr ""
 
-#: src/Views/SourceListView.vala:31 src/Widgets/Connection.vala:60
+#: src/Views/SourceListView.vala:36 src/Views/SourceListView.vala:75
+#: src/Widgets/Connection.vala:62
 msgid "Edit"
 msgstr ""
 
-#: src/Views/SourceListView.vala:33 src/Views/SourceListView.vala:617
-#: src/Widgets/ConnectionEditor.vala:318 src/Widgets/Connection.vala:63
+#: src/Views/SourceListView.vala:42 src/Views/SourceListView.vala:81
+msgid "Duplicate"
+msgstr ""
+
+#: src/Views/SourceListView.vala:48 src/Views/SourceListView.vala:87
+#: src/Views/SourceListView.vala:1266 src/Views/SourceListView.vala:1268
+#: src/Views/SourceListView.vala:1285 src/Views/SourceListView.vala:1287
+#: src/Views/SourceListView.vala:1302 src/Views/SourceListView.vala:1304
+#: src/Widgets/ConnectionEditor.vala:383 src/Widgets/Connection.vala:66
 msgid "Remove"
 msgstr ""
 
-#: src/Views/SourceListView.vala:615
-msgid "Remove "
+#: src/Views/SourceListView.vala:151
+msgid "Hosts"
 msgstr ""
 
-#: src/Views/SourceListView.vala:615
+#: src/Views/SourceListView.vala:153
+msgid "Accounts"
+msgstr ""
+
+#: src/Views/SourceListView.vala:511
+msgid "Please enter the password to unlock the data file"
+msgstr ""
+
+#: src/Views/SourceListView.vala:513
+msgid "Please enter the password to lock the data file"
+msgstr ""
+
+#: src/Views/SourceListView.vala:515
+msgid "Password"
+msgstr ""
+
+#: src/Views/SourceListView.vala:522 src/Widgets/ConnectionEditor.vala:157
+msgid "Cancel"
+msgstr ""
+
+#: src/Views/SourceListView.vala:525
+msgid "Send"
+msgstr ""
+
+#: src/Views/SourceListView.vala:1266
 msgid ""
-"Are you sure you want to remove this connection and all data associated with "
-"it?"
+"Are you sure you want to remove this connection and all associated data?"
 msgstr ""
 
-#: src/Widgets/TerminalBox.vala:191
+#: src/Views/SourceListView.vala:1285
+msgid "Are you sure you want to remove this account and all associated data?"
+msgstr ""
+
+#: src/Views/SourceListView.vala:1302
+msgid "Are you sure you want to remove this bookmark?"
+msgstr ""
+
+#: src/Widgets/TerminalBox.vala:205
 msgid "Connection Error. Retry?"
 msgstr ""
 
-#: src/Widgets/TerminalBox.vala:193 src/Widgets/TerminalBox.vala:226
+#: src/Widgets/TerminalBox.vala:207 src/Widgets/TerminalBox.vala:240
 msgid "No"
 msgstr ""
 
-#: src/Widgets/TerminalBox.vala:196 src/Widgets/TerminalBox.vala:229
+#: src/Widgets/TerminalBox.vala:210 src/Widgets/TerminalBox.vala:243
 msgid "Yes"
 msgstr ""
 
-#: src/Widgets/TerminalBox.vala:212
+#: src/Widgets/TerminalBox.vala:226
 msgid "Connection Error."
 msgstr ""
 
-#: src/Widgets/TerminalBox.vala:224
+#: src/Widgets/TerminalBox.vala:238
 msgid "Fingerprint"
 msgstr ""
 
@@ -79,7 +118,7 @@ msgstr ""
 msgid "SSH Connection Manager"
 msgstr ""
 
-#: src/Widgets/Welcome.vala:26 src/Widgets/ConnectionEditor.vala:128
+#: src/Widgets/Welcome.vala:26 src/Widgets/ConnectionEditor.vala:190
 msgid "Add Connection"
 msgstr ""
 
@@ -87,123 +126,147 @@ msgstr ""
 msgid "Start by adding an SSH connection to EasySSH"
 msgstr ""
 
-#: src/Widgets/HeaderBar.vala:37
+#: src/Widgets/HeaderBar.vala:41
 msgid "Create a new connection"
 msgstr ""
 
-#: src/Widgets/HeaderBar.vala:39 src/Widgets/Preferences.vala:35
+#: src/Widgets/HeaderBar.vala:54 src/Widgets/BookmarksPopover.vala:103
+msgid "Bookmarks"
+msgstr ""
+
+#: src/Widgets/HeaderBar.vala:56 src/Widgets/Preferences.vala:35
 msgid "Preferences"
 msgstr ""
 
-#: src/Widgets/HeaderBar.vala:48
+#: src/Widgets/HeaderBar.vala:58
+msgid "Close All Connections"
+msgstr ""
+
+#: src/Widgets/HeaderBar.vala:68
 msgid "Menu"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:106
-msgid "Save"
+#: src/Widgets/ConnectionEditor.vala:80
+msgid "Set Credentials"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:110
-msgid "Cancel"
+#: src/Widgets/ConnectionEditor.vala:84
+msgid "Choose Account"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:112 src/Widgets/ConnectionEditor.vala:270
-msgid "Advanced"
-msgstr ""
-
-#: src/Widgets/ConnectionEditor.vala:130
-msgid "Edit Connection"
-msgstr ""
-
-#: src/Widgets/ConnectionEditor.vala:134
-msgid "Name:"
-msgstr ""
-
-#: src/Widgets/ConnectionEditor.vala:137
-msgid "Group:"
-msgstr ""
-
-#: src/Widgets/ConnectionEditor.vala:139
-msgid "Host:"
-msgstr ""
-
-#: src/Widgets/ConnectionEditor.vala:141
-msgid "Port:"
-msgstr ""
-
-#: src/Widgets/ConnectionEditor.vala:143
-msgid "Username:"
-msgstr ""
-
-#: src/Widgets/ConnectionEditor.vala:145 src/Widgets/ConnectionEditor.vala:160
+#: src/Widgets/ConnectionEditor.vala:106 src/Widgets/ConnectionEditor.vala:220
 msgid "Password:"
-msgstr ""
-
-#: src/Widgets/ConnectionEditor.vala:149
-msgid "Change Password to Identity File"
 msgstr ""
 
 #: src/Widgets/ConnectionEditor.vala:150
 msgid "Select Identity File"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:156
+#: src/Widgets/ConnectionEditor.vala:151
+msgid "Change Password to Identity File"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:153
+msgid "Save"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:159 src/Widgets/ConnectionEditor.vala:330
+msgid "Advanced"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:175
+msgid "Username:"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:193
+msgid "Edit Connection"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:195
+msgid "Duplicate Connection"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:200 src/Widgets/BookmarksPopover.vala:123
+msgid "Name:"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:203
+msgid "Group:"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:205
+msgid "Host:"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:207
+msgid "Port:"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:216
 msgid "Identity File:"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:169
+#: src/Widgets/ConnectionEditor.vala:229
 msgid "SSH Config:"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:277 src/Widgets/Preferences.vala:99
+#: src/Widgets/ConnectionEditor.vala:337 src/Widgets/Preferences.vala:114
 msgid "Terminal Background Color:"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:286 src/Widgets/Preferences.vala:102
+#: src/Widgets/ConnectionEditor.vala:346 src/Widgets/Preferences.vala:117
 msgid "Terminal Font:"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:328
+#: src/Widgets/ConnectionEditor.vala:372
+msgid "Extra Arguments:"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:393
 msgid "Forwarded Ports:"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:331
+#: src/Widgets/ConnectionEditor.vala:396
 msgid "Add new forwarded port"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:333
+#: src/Widgets/ConnectionEditor.vala:398
 msgid "Source Port:"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:336
+#: src/Widgets/ConnectionEditor.vala:401
 msgid "Destination:"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:341
+#: src/Widgets/ConnectionEditor.vala:406
 msgid "Local"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:344
+#: src/Widgets/ConnectionEditor.vala:409
 msgid "Remote"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:350
+#: src/Widgets/ConnectionEditor.vala:415
 msgid "Add Tunnel"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:375 src/Widgets/Preferences.vala:113
+#: src/Widgets/ConnectionEditor.vala:437 src/Widgets/Preferences.vala:128
 msgid "Appearance"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:376
+#: src/Widgets/ConnectionEditor.vala:438
 msgid "Tunnels"
 msgstr ""
 
-#: src/Widgets/ConnectionEditor.vala:412
+#: src/Widgets/ConnectionEditor.vala:439
+msgid "Other"
+msgstr ""
+
+#: src/Widgets/ConnectionEditor.vala:499
 msgid "Name is already taken"
 msgstr ""
 
-#: src/Widgets/Connection.vala:57
+#: src/Widgets/Connection.vala:59
 msgid "Connect"
 msgstr ""
 
@@ -211,30 +274,62 @@ msgstr ""
 msgid "Select Hosts Configuration Folder…"
 msgstr ""
 
-#: src/Widgets/Preferences.vala:88
+#: src/Widgets/Preferences.vala:99
 msgid "Hosts Configuration Folder:"
 msgstr ""
 
-#: src/Widgets/Preferences.vala:91
+#: src/Widgets/Preferences.vala:102
 msgid "Restore Opened Hosts:"
 msgstr ""
 
-#: src/Widgets/Preferences.vala:94
+#: src/Widgets/Preferences.vala:105
 msgid "Sync SSH Config:"
 msgstr ""
 
-#: src/Widgets/Preferences.vala:105
+#: src/Widgets/Preferences.vala:109
+msgid "Encrypt data:"
+msgstr ""
+
+#: src/Widgets/Preferences.vala:120
 msgid "Use Dark Theme:"
 msgstr ""
 
-#: src/Widgets/Preferences.vala:112
+#: src/Widgets/Preferences.vala:127
 msgid "General"
 msgstr ""
 
-#: src/Widgets/Preferences.vala:125
+#: src/Widgets/Preferences.vala:140
 msgid "Close"
 msgstr ""
 
 #: src/Widgets/TerminalWidget.vala:31
 msgid "Terminal"
+msgstr ""
+
+#: src/Widgets/BookmarksPopover.vala:51
+msgid "Search for bookmarks"
+msgstr ""
+
+#: src/Widgets/BookmarksPopover.vala:55
+msgid "Create a new bookmark"
+msgstr ""
+
+#: src/Widgets/BookmarksPopover.vala:68
+msgid "Run"
+msgstr ""
+
+#: src/Widgets/BookmarksPopover.vala:72
+msgid "Delete"
+msgstr ""
+
+#: src/Widgets/BookmarksPopover.vala:92 src/Widgets/BookmarksPopover.vala:110
+msgid "Add Bookmark"
+msgstr ""
+
+#: src/Widgets/BookmarksPopover.vala:125
+msgid "Command:"
+msgstr ""
+
+#: src/Widgets/BookmarksPopover.vala:237 src/Widgets/BookmarksPopover.vala:241
+msgid "Default"
 msgstr ""
